@@ -9,7 +9,7 @@ This paper examines a data-intensive optimization problem with an economically i
 ```
 2. Navigate to the project directory:
 ```bash
-    cd bundle_pricing_public
+    cd integratedbundlepricing
 ```
 
 3. Install the dependencies
@@ -23,9 +23,9 @@ This paper examines a data-intensive optimization problem with an economically i
 ```
 
 ## Usage
-To obtain the results in Table II, 
+To obtain the results in Table II, run
 ```bash
-run python experiment_baseline_comparison.py
+python experiment_baseline_comparison.py
 ```
 To obtain the results in Figure 5, run 
 ```bash
