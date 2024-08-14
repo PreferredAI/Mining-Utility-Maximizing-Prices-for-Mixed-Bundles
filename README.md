@@ -12,7 +12,7 @@ This paper examines a data-intensive optimization problem with an economically i
     cd integratedbundlepricing
 ```
 
-3. Install the dependencies
+3. Install the dependencies (requires Python 3.11.9)
 ```bash
     pip install -r requirements.txt
 ```
