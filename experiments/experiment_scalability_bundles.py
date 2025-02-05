@@ -21,7 +21,7 @@ parser.add_argument("-e", "--seed", type=int, help="Seed", default = 0)
 parser.add_argument("-s", "--size", type=int, help="Size", default = 4)
 parser.add_argument("-p", "--proportion", type=float, help="Proportion", default = 0.5)
 parser.add_argument("-cls", "--clustersize", type=int, help="Cluster Size", default = 8)
-parser.add_argument("-m", "--maxscale", type=int, help="Max Scale", default = 8)
+parser.add_argument("-m", "--maxscale", type=int, help="Max Scale", default = 9)
 
 args = parser.parse_args()
 
@@ -90,7 +90,7 @@ for scale in range(max_scale):
             refined_revenue, unrefined_revenue = overall_heuristic_split(
                 temp_whole_items, bundles, temp_wtp, clusters,
                 refinement=True, prune=True,
-                bmkc=True, comp_ind=False, lattice=True
+                bmkc=True, comp_ind=False, lattice=True, theta =  0.0001
             )
             end = process_time()
             overall_time_list.append(end - start)

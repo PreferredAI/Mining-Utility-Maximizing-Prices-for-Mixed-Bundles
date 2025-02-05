@@ -23,7 +23,7 @@ This paper examines a price mining problem with the following objective: given a
 ```
 
 ## Usage
-To obtain the results in Table II, run
+To obtain the results in Table 2, run
 ```bash
 python experiment_baseline_comparison.py
 ```
@@ -31,27 +31,28 @@ To obtain the results in Figure 5, run
 ```bash
 python experiment_consumer_demand_problem.py
 ```
+To obtain the results in Table 3, run
+```bash
+python experiment_component_balanced_partitioning_a.py
+python experiment_component_balanced_partitioning_b.py
+```
 To obtain the results in Figure 6, run 
-```bash
-python experiment_component_bmkc_v_random.py
-```
-To obtain the results in Figure 7, run 
-```bash
-python experiment_component_bmkc_heuristic_scalability.py
-```
-To obtain the results in Figure 8, run 
 ```bash
 python experiment_component_comp_ind_v_random.py
 ```
-To obtain the results in Figure 9, run 
+To obtain the results in Table 4, run
+```bash
+python experiment_component_alpha_beta.py
+```
+To obtain the results in Figure 7, run 
 ```bash
 python experiment_component_lattice_v_graph.py
 ```
-To obtain the results for pruning, run 
+To obtain the results in Table 4, run 
 ```bash
 python experiment_component_pruning.py
 ```
-To obtain the results in Figure 10, run 
+To obtain the results in Figure 8, run 
 ```bash
 python experiment_scalability_users.py 
 ```

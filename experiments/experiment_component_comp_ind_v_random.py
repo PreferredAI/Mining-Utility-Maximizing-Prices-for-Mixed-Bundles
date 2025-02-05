@@ -95,7 +95,7 @@ for clusters in clusters_list:
                     temp_whole_items, bundles, temp_wtp, clusters,
                     refinement=config['refinement'], prune=config['prune'],
                     bmkc=config['bmkc'], comp_ind=config['comp_ind'], lattice=config['lattice'],
-                    random_CI=config['random']
+                    random_CI=config['random'], theta =  0.0001
                 )
                 end = process_time()
             except Exception as e:

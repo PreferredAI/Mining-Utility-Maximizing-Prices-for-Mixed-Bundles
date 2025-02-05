@@ -125,3 +125,38 @@ def calculate_alternative_revenue(whole_items, wtp, bundles, bundle_prices, pack
     total_revenue = sum(revenue_dict.values())
     
     return total_revenue, revenue_dict, total_surplus
+
+
+
+
+def calculate_alternative_revenue_sbpc_greedy(whole_items, wtp, bundles, bundle_prices):
+    revenue_dict = {bundle: 0 for bundle in bundles}  # initialize revenue_dict
+    total_surplus = 0
+
+    # Iterate through each consumer's WTP
+    for k in range(len(wtp)):  
+        wtp_k = wtp[k]  # Consumer's WTP for all items
+        max_surplus = float('-inf')  # Initialize max surplus for this consumer
+        best_configuration = None  # Track the best configuration for the consumer
+
+        purchased_bundles, purchased_bundles_weights = calculate_weights(whole_items, wtp_k, bundles, bundle_prices)
+        sorted_bundles = sorted(purchased_bundles, key=lambda x: purchased_bundles_weights[x] / math.sqrt(len(x)), reverse=True)
+        if not sorted_bundles:
+            continue  # Skip this consumer if no bundles are available
+        chosen_bundle = sorted_bundles[0]
+        configuration = [chosen_bundle] + [frozenset({item}) for item in whole_items if item not in chosen_bundle]
+        surplus = 0
+
+        for b in configuration:  # Iterate through each bundle in the configuration (bundle + components)
+
+            surplus += max(0, sum(wtp_k[whole_items.index(item)] for item in b) - bundle_prices.get(b))  # WTP for bundle b
+
+        total_surplus += surplus
+
+    total_revenue  = None
+    # total_revenue, revenue_dict isnt filled up here
+    return total_revenue, revenue_dict, total_surplus
+
+
+
+        

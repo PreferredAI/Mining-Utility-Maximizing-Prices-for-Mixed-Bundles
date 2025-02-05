@@ -9,14 +9,12 @@ from functions.consumer_decision import *
 from functions.pricing_functions import *
 from functions.lattice import *
 
-def initialize_algorithm(whole_items, wtp, bundles, pruning, constant, comp_ind, lattice, theta = 0.0001, random_CI = False):
-
+def initialize_algorithm(whole_items, wtp, bundles, pruning, constant, comp_ind, lattice, theta = 0.0001, random_CI = False, alpha = 1, beta = 1  ):
 
     # CONSTANTS
     theta = theta
     CONSTANT = constant
-    alpha = 1  
-    beta = 1   
+
     
     candidate_set = set(bundles)
 

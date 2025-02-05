@@ -9,8 +9,15 @@ from functions.lattice import *
 from functions.algorithm import *
 from functions.split_heuristic import *
 from functions.baseline import *
+import numpy as np
+from sklearn.metrics import pairwise_distances
+from sklearn.preprocessing import OneHotEncoder
+import random
+from functions.cluster import *
+from functions.min_k_cut import *
 
-def overall_heuristic_split(whole_items, complete, wtp, clusters, refinement, prune, bmkc, comp_ind, lattice, constant = 0.15, random_CI = False, theta = 0.0001):
+
+def overall_heuristic_split(whole_items, complete, wtp, clusters, refinement, prune, bmkc, comp_ind, lattice, constant = 0.15, random_CI = False, theta = 0.1, partition_method = 'random', alpha = 1, beta = 1):
     
     # split the complete into many bundles, and run the pricing algo
     bundles = list(complete)
@@ -28,7 +35,9 @@ def overall_heuristic_split(whole_items, complete, wtp, clusters, refinement, pr
 
             partitions.append(partition)
 
-    else: 
+
+    elif partition_method == 'random': 
+        
         # Random split implmenetation
         complete_list = list(complete)
         # Shuffle the order of bundles randomly
@@ -37,14 +46,85 @@ def overall_heuristic_split(whole_items, complete, wtp, clusters, refinement, pr
         # Split the shuffled bundles into clusters
         cluster_size = math.ceil(len(complete_list) / clusters) 
         partitions = [set(complete_list[i:i+cluster_size]) for i in range(0, len(complete_list), cluster_size)]
+
+
+    elif partition_method == 'kmeans':
+         # Generate the binary matrix
+        matrix = generate_bundle_matrix(bundles, whole_items)
+        cluster_assignments, cluster_centers = k_means_clustering(matrix, clusters)
+
+        # Group bundles by their cluster assignments
+        clusterss = {i: [] for i in range(clusters)}
+        for idx, cluster in enumerate(cluster_assignments):
+            clusterss[cluster].append(bundles[idx])
+
+        # Convert clusters dictionary to a list of clusters
+        clusters_list = [clusterss[i] for i in range(clusters)]
+
+        partitions = clusters_list
+
+    elif partition_method == 'balanced_kmeans':
+         # Generate the binary matrix
+        matrix = generate_bundle_matrix(bundles, whole_items)
+        cluster_assignments, cluster_centers = balanced_k_means(matrix, clusters)
+
+        # Group bundles by their cluster assignments
+        clusterss = {i: [] for i in range(clusters)}
+        for idx, cluster in enumerate(cluster_assignments):
+            clusterss[cluster].append(bundles[idx])
+
+        # Convert clusters dictionary to a list of clusters
+        clusters_list = [clusterss[i] for i in range(clusters)]
+
+        partitions = clusters_list
+
+
+    elif partition_method == 'minkcut':
+        graph = build_lattice(bundles)
+
+        cut_value, partitions = min_k_cut(graph, clusters, seed=42)
+        
+    elif partition_method == 'spectral':
+        
+        # Simple Graph
+        simple_graph = nx.Graph()
+        simple_graph.add_nodes_from(bundles)
+
+        # Add edges between bundles if they have at least one item in common
+        for bundle1 in bundles:
+            for bundle2 in bundles:
+                if bundle1 != bundle2 and bundle1.intersection(bundle2):
+                    simple_graph.add_edge(bundle1, bundle2, weight = len(bundle1.intersection(bundle2)))
+
+        spectral_partitions = spectral_clustering_min_k_cut(simple_graph, clusters)
+
+        partitions = spectral_partitions
+    
+    elif partition_method == 'balanced_spectral':
+        
+        # Simple Graph
+        simple_graph = nx.Graph()
+        simple_graph.add_nodes_from(bundles)
+
+        # Add edges between bundles if they have at least one item in common
+        for bundle1 in bundles:
+            for bundle2 in bundles:
+                if bundle1 != bundle2 and bundle1.intersection(bundle2):
+                    simple_graph.add_edge(bundle1, bundle2, weight = len(bundle1.intersection(bundle2)))
+
+        spectral_partitions = balanced_spectral_clustering_min_k_cut(simple_graph, clusters)
+
+        partitions = spectral_partitions
     end = process_time()
 
+    # print([len(i) for i in partitions])
+    # return 0, 0 
 
     complete_prices = {}
 
     # PRICE
     for partition in partitions:
-        cluster_price = initialize_algorithm(whole_items, wtp, partition, pruning=prune, comp_ind=comp_ind, lattice=lattice, constant=constant, random_CI=random_CI, theta = theta)
+        cluster_price = initialize_algorithm(whole_items, wtp, partition, pruning=prune, comp_ind=comp_ind, lattice=lattice, constant=constant, random_CI=random_CI, theta = theta, alpha=alpha, beta=beta)
         complete_prices.update(cluster_price)
 
     revenue, revenue_breakdown = calculate_revenue(whole_items, wtp, complete, complete_prices)
@@ -66,7 +146,7 @@ def overall_heuristic_split(whole_items, complete, wtp, clusters, refinement, pr
 
 
 
-def overall_heuristic_split_irefine(whole_items, complete, wtp, clusters, refinement, prune, bmkc, comp_ind, lattice, constant = 0.15, random_CI = False):
+def overall_heuristic_split_irefine(whole_items, complete, wtp, clusters, refinement, prune, bmkc, comp_ind, lattice, constant = 0.15, random_CI = False, theta =0.1, partition_method = 'random', alpha = 1, beta = 1):
     
     const = 1.0003
     # split the complete into many bundles, and run the pricing algo
@@ -85,7 +165,8 @@ def overall_heuristic_split_irefine(whole_items, complete, wtp, clusters, refine
 
             partitions.append(partition)
 
-    else: 
+    elif partition_method == 'random': 
+        
         # Random split implmenetation
         complete_list = list(complete)
         # Shuffle the order of bundles randomly
@@ -94,6 +175,75 @@ def overall_heuristic_split_irefine(whole_items, complete, wtp, clusters, refine
         # Split the shuffled bundles into clusters
         cluster_size = math.ceil(len(complete_list) / clusters) 
         partitions = [set(complete_list[i:i+cluster_size]) for i in range(0, len(complete_list), cluster_size)]
+
+
+    elif partition_method == 'kmeans':
+         # Generate the binary matrix
+        matrix = generate_bundle_matrix(bundles, whole_items)
+        cluster_assignments, cluster_centers = k_means_clustering(matrix, clusters)
+
+        # Group bundles by their cluster assignments
+        clusterss = {i: [] for i in range(clusters)}
+        for idx, cluster in enumerate(cluster_assignments):
+            clusterss[cluster].append(bundles[idx])
+
+        # Convert clusters dictionary to a list of clusters
+        clusters_list = [clusterss[i] for i in range(clusters)]
+
+        partitions = clusters_list
+
+    elif partition_method == 'minkcut':
+        graph = build_lattice(bundles)
+
+        cut_value, partitions = min_k_cut(graph, clusters, seed=42)
+        
+    elif partition_method == 'spectral':
+        
+        # Simple Graph
+        simple_graph = nx.Graph()
+        simple_graph.add_nodes_from(bundles)
+
+        # Add edges between bundles if they have at least one item in common
+        for bundle1 in bundles:
+            for bundle2 in bundles:
+                if bundle1 != bundle2 and bundle1.intersection(bundle2):
+                    simple_graph.add_edge(bundle1, bundle2, weight = len(bundle1.intersection(bundle2)))
+
+        spectral_partitions = spectral_clustering_min_k_cut(simple_graph, clusters)
+
+        partitions = spectral_partitions
+        
+    elif partition_method == 'balanced_spectral':
+        
+        # Simple Graph
+        simple_graph = nx.Graph()
+        simple_graph.add_nodes_from(bundles)
+
+        # Add edges between bundles if they have at least one item in common
+        for bundle1 in bundles:
+            for bundle2 in bundles:
+                if bundle1 != bundle2 and bundle1.intersection(bundle2):
+                    simple_graph.add_edge(bundle1, bundle2, weight = len(bundle1.intersection(bundle2)))
+
+        spectral_partitions = balanced_spectral_clustering_min_k_cut(simple_graph, clusters)
+
+        partitions = spectral_partitions
+
+    elif partition_method == 'balanced_kmeans':
+         # Generate the binary matrix
+        matrix = generate_bundle_matrix(bundles, whole_items)
+        cluster_assignments, cluster_centers = balanced_k_means(matrix, clusters)
+
+        # Group bundles by their cluster assignments
+        clusterss = {i: [] for i in range(clusters)}
+        for idx, cluster in enumerate(cluster_assignments):
+            clusterss[cluster].append(bundles[idx])
+
+        # Convert clusters dictionary to a list of clusters
+        clusters_list = [clusterss[i] for i in range(clusters)]
+
+        partitions = clusters_list
+        
     end = process_time()
 
     total_coverage = np.sum(wtp)
@@ -102,7 +252,7 @@ def overall_heuristic_split_irefine(whole_items, complete, wtp, clusters, refine
 
     # PRICE
     for partition in partitions:
-        cluster_price = initialize_algorithm(whole_items, wtp, partition, pruning=prune, comp_ind=comp_ind, lattice=lattice, constant=constant, random_CI=random_CI)
+        cluster_price = initialize_algorithm(whole_items, wtp, partition, pruning=prune, comp_ind=comp_ind, lattice=lattice, constant=constant, random_CI=random_CI, theta = theta, alpha=alpha, beta=beta)
         complete_prices.update(cluster_price)
 
     revenue, revenue_breakdown = calculate_revenue(whole_items, wtp, complete, complete_prices)

@@ -38,6 +38,8 @@ max_scale = args.maxscale
 print("Comparison Against Baseline")
 
 datasets = ["Electronics", "Sports and Outdoors", "UEL"]
+
+
 for dataset in datasets:
 
     if dataset == "Electronics":
@@ -60,11 +62,9 @@ for dataset in datasets:
 
 
     # Initialize the results dictionary
-    comparison_results = {'overall_revenue': [], 'rmp_revenue': [], 'overall_time': [], 'rmp_time': [], 'baseline_revenue': []}
-
+    comparison_results = {'overall_revenue': [], 'rmp_revenue': [], 'baseline_revenue':[], 'hill_revenue': [], 'closed_form_revenue': []}
     bundle_sizes = []
 
-    results = {key: {'overall_revenue': [], 'rmp_revenue': [], 'baseline_revenue': []} for key in range(max_scale)}
 
 
     scale_start_time = process_time()
@@ -75,7 +75,8 @@ for dataset in datasets:
         rmp_revenue_list = []
         rmp_time_list = []
         baseline_revenue_list = []
-
+        hill_revenue_list = []
+        closed_form_revenue_list = []
         # Initialize the results dictionary
         for _ in range(repetitions):
             target_items = random.sample(whole_items, size + scale)
@@ -116,23 +117,23 @@ for dataset in datasets:
                 clusters = 1
 
             # Overall
-            start = process_time()
+            start = time.time()
             try:
                 refined_revenue, unrefined_revenue = overall_heuristic_split_irefine(
                     temp_whole_items, bundles, temp_wtp, clusters,
                     refinement=True, prune=True,
-                    bmkc=True, comp_ind=False, lattice=True
+                    bmkc=False, comp_ind=False, lattice=True, partition_method = 'balanced_kmeans'
                 )
-                end = process_time()
+                end = time.time()
                 overall_revenue_list.append(refined_revenue/total_coverage)
                 overall_time_list.append(end - start)
-                results[scale]['overall_revenue'].append(refined_revenue/total_coverage)
             except Exception as e:
                 print("An error occurred:", e)
                 import traceback
                 traceback.print_exc()
                 continue  # Skip the current iteration and proceed to the next one
-
+            
+            algo_time = end - start
             # Ind-Pricing
             
             start = process_time()
@@ -140,38 +141,42 @@ for dataset in datasets:
             end = process_time()
             rmp_revenue_list.append(rmp_revenue/total_coverage)
             rmp_time_list.append(end - start)
-            results[scale]['rmp_revenue'].append(rmp_revenue/total_coverage)
             
             # RMP Component prices (Baseline)
             component_revenue, component_prices = rmp_baseline_return_price(temp_whole_items, temp_wtp, components_set )
             baseline_revenue_list.append(component_revenue/total_coverage)
-            results[scale]['baseline_revenue'].append(component_revenue/total_coverage)
+            
+            hill_revenue, _ = hill_climbing_baseline(temp_whole_items, temp_wtp, bundles, max_time = algo_time)
+            hill_revenue_list.append(hill_revenue / total_coverage)
 
-
+            closed_form_revenue_normal_simple, _ = closed_form_extension_baseline_normal(temp_whole_items, temp_wtp, bundles)
+            closed_form_revenue_list.append(closed_form_revenue_normal_simple / total_coverage)
 
         bundle_sizes.append(len(bundles))
 
-
         comparison_results['overall_revenue'].append(np.mean(overall_revenue_list))
         comparison_results['rmp_revenue'].append(np.mean(rmp_revenue_list))
-        comparison_results['overall_time'].append(np.mean(overall_time_list))
-        comparison_results['rmp_time'].append(np.mean(rmp_time_list))
         comparison_results['baseline_revenue'].append(np.mean(baseline_revenue_list))
+        comparison_results['hill_revenue'].append(np.mean(hill_revenue_list))
+        comparison_results['closed_form_revenue'].append(np.mean(closed_form_revenue_list))
 
-    format_string = "{:<25}{:<25}{:<30}{:<30}{:<30}"
+
+        format_string = "{:<25}{:<25}{:<30}{:<30}{:<30}{:<30}{:<30}"
 
     # Print aggregated results
     print(f"{dataset} Dataset Results:")
-    
-    print(format_string.format("Items", "Bundles", "IPM", "Ind-Pricing", "Components"))
-    for s, (overall_revenue, rmp_revenue, baseline_revenue) in enumerate(
+
+    print(format_string.format("Items", "Bundles", "IPM", "Ind-Pricing", "Components", "HillClimbing", "ClosedFormExtended"))
+    for s, (overall_revenue, rmp_revenue, baseline_revenue, hill_revenue, closed_form_simple_normal_revenue) in enumerate(
         zip(
             comparison_results['overall_revenue'],
             comparison_results['rmp_revenue'],
-            comparison_results['baseline_revenue']
+            comparison_results['baseline_revenue'],
+            comparison_results['hill_revenue'],
+            comparison_results['closed_form_revenue']
         )
     ):
-        print(format_string.format(s+size, bundle_sizes[s], f"{overall_revenue*100:.2f}%", f"{rmp_revenue*100:.2f}%", f"{baseline_revenue*100:.2f}%"))
+        print(format_string.format(s+size, bundle_sizes[s], f"{overall_revenue*100:.2f}%", f"{rmp_revenue*100:.2f}%", f"{baseline_revenue*100:.2f}%",  f"{hill_revenue*100:.2f}%", f"{closed_form_simple_normal_revenue*100:.2f}%"))
 
 
 

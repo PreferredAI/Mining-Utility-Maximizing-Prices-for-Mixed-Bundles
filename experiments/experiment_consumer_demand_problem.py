@@ -93,27 +93,25 @@ for n in range(5, 5 + max_scale):
         # RMP Component prices
         component_revenue, component_prices = rmp_baseline_return_price(temp_whole_items, temp_wtp, components )
 
-
         # Comparison methods
         methods = {
             'max_price': max_price,
             'max_size': max_size,
             'max_surplus_by_weight': max_weighted_packing,
-            'components_baseline': min_price
-
+            'components_baseline': min_price,
+            'single_bundle_plus_components_greedy': None
         }
-
 
         for method_name, method_func in methods.items():
             start = time()
             if method_name == 'components_baseline':
                 revenue, revenue_dict, surplus = calculate_alternative_revenue(temp_whole_items, temp_wtp, components, component_prices, method_func)
+            elif method_name == 'single_bundle_plus_components_greedy':
+                revenue, revenue_dict, surplus = calculate_alternative_revenue_sbpc_greedy(temp_whole_items, temp_wtp, bundles, rmp_prices)
             else:
                 revenue, revenue_dict, surplus = calculate_alternative_revenue(temp_whole_items, temp_wtp, bundles, rmp_prices, method_func)
             end = time()
             results[method_name][n].append((surplus, surplus / total_coverage * 100, end - start))
-
-        
 
 
 # Calculate and print averages

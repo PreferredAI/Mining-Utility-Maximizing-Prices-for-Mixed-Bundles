@@ -93,7 +93,8 @@ for clusters in clusters_list:
                 refined_revenue, unrefined_revenue = overall_heuristic_split(
                     temp_whole_items, bundles, temp_wtp, clusters,
                     refinement=config['refinement'], prune=config['prune'],
-                    bmkc=config['bmkc'], comp_ind=config['comp_ind'], lattice=config['lattice']
+                    bmkc=config['bmkc'], comp_ind=config['comp_ind'], lattice=config['lattice'],
+                    theta =  0.0001
                 )
                 end = process_time()
             except Exception as e:

@@ -95,7 +95,7 @@ for scale in range(max_scale):
             refined_revenue, unrefined_revenue = overall_heuristic_split(
                 temp_whole_items, bundles, temp_wtp, clusters,
                 refinement=True, prune=True,
-                bmkc=True, comp_ind=False, lattice=True
+                bmkc=True, comp_ind=False, lattice=True, theta =  0.0001
             )
             end = process_time()
             overall_time_list.append(end - start)
