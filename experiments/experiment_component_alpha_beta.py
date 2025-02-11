@@ -1,4 +1,4 @@
-#compare alpha beta
+# Comparing the Effect of Varying Alpha and Beta
 
 import numpy as np
 import argparse
@@ -141,26 +141,41 @@ for dataset in datasets:
                     alpha_beta_results["repetition"].append(repetition + 1)
                     alpha_beta_results["revenue"].append(0)
                     alpha_beta_results["time"].append(0)
+from collections import defaultdict
+import numpy as np
 
-# Print results in a clean, grouped tabular format
-print("\nAlpha-Beta Experiment Results:")
-print("{:<10} {:<10} {:<12} {:<15} {:<15}".format("Alpha", "Beta", "Repetition", "Revenue", "Time"))
+# Group results by (alpha, beta)
+aggregated_results = defaultdict(lambda: {"revenue": [], "time": []})
 
-# Sort results for clean printing
-sorted_results = sorted(zip(
+# Populate the dictionary
+for alpha, beta, repetition, revenue, time in zip(
     alpha_beta_results["alpha"],
     alpha_beta_results["beta"],
     alpha_beta_results["repetition"],
     alpha_beta_results["revenue"],
     alpha_beta_results["time"]
+):
+    aggregated_results[(alpha, beta)]["revenue"].append(revenue)
+    aggregated_results[(alpha, beta)]["time"].append(time)
+
+# Print results in a clean, grouped tabular format
+print("\nAlpha-Beta Experiment Results:")
+print("{:<10} {:<10} {:<15} {:<25} {:<25}".format(
+    "Alpha", "Beta", "Count", "Avg Revenue ± Std", "Avg Time ± Std"
 ))
+print("=" * 90)
 
-current_alpha = None
-current_beta = None
-for alpha, beta, repetition, revenue, time in sorted_results:
-    if alpha != current_alpha or beta != current_beta:
-        if current_alpha is not None:
-            print("-" * 60)
-        current_alpha, current_beta = alpha, beta
-    print("{:<10.2f} {:<10.2f} {:<12} {:<15.5f} {:<15.5f}".format(alpha, beta, repetition, revenue, time))
+# Sort and print results
+for (alpha, beta), values in sorted(aggregated_results.items()):
+    revenue_list = np.array(values["revenue"])
+    time_list = np.array(values["time"])
 
+    revenue_avg = np.mean(revenue_list)
+    revenue_std = np.std(revenue_list, ddof=1)  # Unbiased (sample) std deviation
+
+    time_avg = np.mean(time_list)
+    time_std = np.std(time_list, ddof=1)
+
+    print("{:<10.2f} {:<10.2f} {:<15} {:<12.5f} ± {:<12.5f} {:<12.5f} ± {:<12.5f}".format(
+        alpha, beta, len(revenue_list), revenue_avg, revenue_std, time_avg, time_std
+    ))

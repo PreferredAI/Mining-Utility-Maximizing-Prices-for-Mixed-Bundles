@@ -1,4 +1,4 @@
-# comparing only lattice
+# Comparing Lattice vs Simple Graph
 
 import numpy as np
 import argparse
@@ -111,6 +111,6 @@ for clusters in clusters_list:
     print(f"Number of clusters (k) = {clusters}")
     for config_name, config_results in results.items():
         print(f"Configuration {config_name}:")
-        print(f"Refined: {np.mean(config_results['refined']):.5f} ± {np.std(config_results['refined']):.5f}")
+        print(f"Revenue: {np.mean(config_results['refined']):.5f} ± {np.std(config_results['refined']):.5f}")
         print(f"Time: {np.mean(config_results['time']):.5f} ± {np.std(config_results['time']):.5f}")
         print()

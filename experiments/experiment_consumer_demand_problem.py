@@ -1,12 +1,10 @@
-# with rmp pricing, how do alternative consumer deicsion methods ocmpare?
-# updated packages and refactored code
-# we take price as a given
+# Consumer Demand Problem, Comparing how the different heuristics to the Consumer Demand Problem perform at scale
 
 
 import numpy as np
 import argparse
 import random
-from time import time
+import time
 import warnings
 import itertools
 warnings.filterwarnings("error")
@@ -46,7 +44,7 @@ print("Consumer Decision Experiment")
 
 # Initialize the results dictionary
 results = {method: {n: [] for n in range(5, 5 + max_scale)} for method in [
-    'max_price', 'max_size', 'max_surplus_by_weight', 'components_baseline']}
+    'GMP', 'GMS', 'MSS', 'GIC', 'SBPC']}
 
 
 
@@ -85,32 +83,32 @@ for n in range(5, 5 + max_scale):
         
 
 
-        start = time()
+        start = time.time()
         # RMP bundle prices
         rmp_revenue, rmp_prices = rmp_baseline_return_price(temp_whole_items, temp_wtp, bundles )
-        end = time()
+        end = time.time()
 
         # RMP Component prices
         component_revenue, component_prices = rmp_baseline_return_price(temp_whole_items, temp_wtp, components )
 
         # Comparison methods
         methods = {
-            'max_price': max_price,
-            'max_size': max_size,
-            'max_surplus_by_weight': max_weighted_packing,
-            'components_baseline': min_price,
-            'single_bundle_plus_components_greedy': None
+            'GMP': max_price,
+            'GMS': max_size,
+            'MSS': max_weighted_packing,
+            'GIC': min_price,
+            'SBPC': None
         }
 
         for method_name, method_func in methods.items():
-            start = time()
-            if method_name == 'components_baseline':
+            start = time.time()
+            if method_name == 'GIC':
                 revenue, revenue_dict, surplus = calculate_alternative_revenue(temp_whole_items, temp_wtp, components, component_prices, method_func)
-            elif method_name == 'single_bundle_plus_components_greedy':
+            elif method_name == 'SBPC':
                 revenue, revenue_dict, surplus = calculate_alternative_revenue_sbpc_greedy(temp_whole_items, temp_wtp, bundles, rmp_prices)
             else:
                 revenue, revenue_dict, surplus = calculate_alternative_revenue(temp_whole_items, temp_wtp, bundles, rmp_prices, method_func)
-            end = time()
+            end = time.time()
             results[method_name][n].append((surplus, surplus / total_coverage * 100, end - start))
 
 
@@ -120,7 +118,7 @@ for n in range(5, 5 + max_scale):
     for method_name in results:
         if results[method_name][n]:
             avg_percentage = np.mean([res[1] for res in results[method_name][n]])
-            print(f"  {method_name.replace('_', ' ').title()}:")
-            print(f"    Average Percentage: {avg_percentage:.3f}")
+            print(f"  {method_name.upper()}:")
+            print(f"    Surplus Coverage: {avg_percentage:.3f}")
 
 

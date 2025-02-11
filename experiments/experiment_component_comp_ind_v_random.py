@@ -1,4 +1,4 @@
-# comparing comp CI random vs ordered. 
+#  Comparing the use of Competitive Independence to serialise the price search vs random and reverse competitive independence
 
 
 import numpy as np
@@ -37,7 +37,7 @@ data_PID = np.loadtxt("../data/Electronics_PID.csv", delimiter=",", dtype=str)
 whole_items = [i for i in data_PID]
 np_wtp = np.loadtxt("../data/Electronics_wtp.csv", delimiter=",")
 
-print("Experiment on Competitive Independence Compared with Random")
+print("Experiment on Competitive Independence Compared with Random and Reverse Competitive Independence")
 
 
 clusters_list = range(6, 15, 2)
@@ -113,7 +113,7 @@ for clusters in clusters_list:
     print(f"Number of clusters (k) = {clusters}")
     for config_name, config_results in results.items():
         print(f"Configuration {config_name}:")
-        print(f"Refined: {np.mean(config_results['refined']):.5f} ± {np.std(config_results['refined']):.5f}")
+        print(f"Revenue: {np.mean(config_results['refined']):.5f} ± {np.std(config_results['refined']):.5f}")
         print(f"Time: {np.mean(config_results['time']):.5f} ± {np.std(config_results['time']):.5f}")
         print()
 

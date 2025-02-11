@@ -1,4 +1,5 @@
-#compare overall against baseline
+# Comparison against Baselines
+
 
 import numpy as np
 import argparse
@@ -166,7 +167,7 @@ for dataset in datasets:
     # Print aggregated results
     print(f"{dataset} Dataset Results:")
 
-    print(format_string.format("Items", "Bundles", "IPM", "Ind-Pricing", "Components", "HillClimbing", "ClosedFormExtended"))
+    print(format_string.format("Items", "Bundles", "IPMM", "Ind-Pricing", "Components", "HillClimbing", "ClosedFormExtended"))
     for s, (overall_revenue, rmp_revenue, baseline_revenue, hill_revenue, closed_form_simple_normal_revenue) in enumerate(
         zip(
             comparison_results['overall_revenue'],

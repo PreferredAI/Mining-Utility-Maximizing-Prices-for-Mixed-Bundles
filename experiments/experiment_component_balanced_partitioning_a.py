@@ -1,4 +1,4 @@
-# comparing balanced partitioning methods
+# Comparing balanced partitioning methods B = 50
 
 import numpy as np
 import argparse
@@ -41,7 +41,7 @@ data_PID = np.loadtxt("../data/Electronics_PID.csv", delimiter=",", dtype=str)
 whole_items = [i for i in data_PID]
 np_wtp = np.loadtxt("../data/Electronics_wtp.csv", delimiter=",")
 
-print("Experiment on Balanced Partitioning")
+print("Experiment on Balanced Partitioning B = 50")
 components = comp
 
 # Random 100 consumers 
@@ -50,13 +50,13 @@ np_wtp = np_wtp[random_indices]
 
 # Define different configurations for the ablation study
 configurations = {
-    'BMKC': {'refinement': True, 'prune': True, 'bmkc': True, 'comp_ind': False, 'lattice': True, 'partition_method': None},
+    # 'BMKC': {'refinement': True, 'prune': True, 'bmkc': True, 'comp_ind': False, 'lattice': True, 'partition_method': None},
     'Random': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True,'partition_method': 'random'},
-    'KMeans': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'kmeans'},
+    'NKMeans': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'kmeans'},
     'MinKCut': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'minkcut'},
-    'Spectral': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'spectral'},
-    'BalancedKMeans': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'balanced_kmeans'},
-    'BalancedSpectral': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'balanced_spectral'}
+    'NSpectral': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'spectral'},
+    'BKMeans': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'balanced_kmeans'},
+    'BSpectral': {'refinement': True, 'prune': True, 'bmkc': False, 'comp_ind': False, 'lattice': True, 'partition_method': 'balanced_spectral'}
 
 }
 

@@ -1,4 +1,4 @@
-#compare theta
+# Comparing the values of Gamma and Showing the Efficiency of Pruning
 
 import numpy as np
 import argparse
@@ -148,48 +148,28 @@ for dataset in datasets:
                 continue  # Skip to the next theta
 
 
-# Sort results for better readability
-sorted_results = sorted(zip(theta_results["repetition"], theta_results["theta"], theta_results["revenue"], theta_results["time"]))
+from collections import defaultdict
+import numpy as np
 
-# Print header
-print("\nTheta Experiment Results:")
-print("{:<12} {:<10} {:<15} {:<15}".format("Repetition", "Theta", "Revenue", "Time"))
+# Store results grouped by theta
+theta_data = defaultdict(lambda: {"revenue": [], "time": []})
 
-# Process and print results, grouping by repetition
-current_repetition = None
-repetition_data = {}  # To store data for calculating averages and std deviations
+# Collect data
+for theta, revenue, time in zip(theta_results["theta"], theta_results["revenue"], theta_results["time"]):
+    theta = 0 if theta is None else theta  # Replace None with 0
+    theta_data[theta]["revenue"].append(revenue)
+    theta_data[theta]["time"].append(time)
 
-for repetition, theta, revenue, time in sorted_results:
-    if repetition != current_repetition:
-        # Print separator for new repetition group
-        if current_repetition is not None:
-            print("-" * 60)
-        current_repetition = repetition
+# Print summary
+print("\nSummary (Averages and Standard Deviations by Theta):")
+print("{:<10} {:<25} {:<25}".format("Theta", "Avg Revenue ± Std", "Avg Time ± Std"))
+print("=" * 70)
 
-    # Print the data row
-    print("{:<12} {:<10} {:<15.5f} {:<15.5f}".format(
-        repetition,
-        f"{theta:.5f}" if theta is not None else "None",
-        revenue,
-        time
+for theta, data in sorted(theta_data.items()):
+    revenue_list = np.array(data["revenue"])
+    time_list = np.array(data["time"])
+
+    print("{:<10.5f} {:<12.5f} ± {:<12.5f} {:<12.5f} ± {:<12.5f}".format(
+        theta, np.mean(revenue_list), np.std(revenue_list, ddof=1),
+        np.mean(time_list), np.std(time_list, ddof=1)
     ))
-
-    # Collect data for averages and std deviation
-    if repetition not in repetition_data:
-        repetition_data[repetition] = {"revenue": [], "time": []}
-    repetition_data[repetition]["revenue"].append(revenue)
-    repetition_data[repetition]["time"].append(time)
-
-# Print summary for each repetition
-print("\nSummary (Averages and Standard Deviations):")
-print("{:<12} {:<15} {:<15}".format("Repetition", "Avg Revenue", "Std Revenue"))
-print("{:<12} {:<15} {:<15}".format("", "Avg Time", "Std Time"))
-
-for repetition, data in repetition_data.items():
-    avg_revenue = np.mean(data["revenue"])
-    std_revenue = np.std(data["revenue"], ddof=1)
-    avg_time = np.mean(data["time"])
-    std_time = np.std(data["time"], ddof=1)
-
-    print("{:<12} {:<15.5f} {:<15.5f}".format(repetition, avg_revenue, std_revenue))
-    print("{:<12} {:<15.5f} {:<15.5f}".format("", avg_time, std_time))
